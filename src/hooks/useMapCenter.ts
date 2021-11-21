@@ -17,13 +17,7 @@ const useMapCenter = (): ListenToMovements  => {
     const [values, setCoordinates] = coordinates
     const [oldX, oldY] = values
 
-    map.on('moveend', () => {
-      const { lat: y, lng: x } = map.getCenter()
     
-      if (Math.abs(y - oldY) > CHUNK_HEIGHT * 1 / 4 || Math.abs(x - oldX) > CHUNK_WIDTH * 1 / 4) {
-        setCoordinates([x, y])
-      }
-    })
   }
 }
 

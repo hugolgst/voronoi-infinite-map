@@ -1,9 +1,8 @@
-import { CHUNK_HEIGHT, CHUNK_WIDTH, Datum, useQueryPolygons } from '../hooks/useQueryPolygons'
+import { CHUNK_HEIGHT, CHUNK_WIDTH, useQueryPolygons } from '../hooks/useQueryPolygons'
+import L, { Layer } from 'leaflet'
 import { MapConsumer, MapContainer } from 'react-leaflet'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 
-import L from 'leaflet'
-import { VoronoiPolygon } from 'd3-voronoi'
 import { useDrawPolygon } from '../hooks/useDrawPolygon'
 
 export type Coordinates = [number, number]
@@ -11,9 +10,6 @@ export type Coordinates = [number, number]
 const Map = (): JSX.Element => {
   const queryPolygons = useQueryPolygons()
   const drawPolygon = useDrawPolygon()
-  const [ polygons, setPolygons ] = useState<Array<VoronoiPolygon<Datum>>>()
-  const coordinatesState = useState<Coordinates>([0, 0])
-  const [ coordinates, setCoordinates ] = coordinatesState
 
   return <MapContainer
     style={{
@@ -45,32 +41,32 @@ const Map = (): JSX.Element => {
             layer.remove()
           })
         }
+        const rendered: Array<[number, number]> = []
 
-        useEffect(() => {
-          map.on('moveend', () => {
-            const { lat: y, lng: x } = map.getCenter()
-            const zoom = map.getZoom()
-          
-            if (Math.abs(y - coordinates[1]) > CHUNK_HEIGHT / 8 / zoom || Math.abs(x - coordinates[0]) > CHUNK_WIDTH / 8 / zoom) {
-              clearCanvas()
-              setCoordinates([x, y])
-              setPolygons(queryPolygons(...coordinates))
+        map.on('moveend', () => {
+          const chunksX = Math.ceil(Math.abs((map.getBounds().getWest() - map.getBounds().getEast()) / CHUNK_WIDTH)) + 1
+          const chunksY = Math.ceil(Math.abs((map.getBounds().getSouth() - map.getBounds().getNorth()) / CHUNK_HEIGHT)) + 1
+
+
+          for (let i = 0; i < chunksX; i++) {
+            const x = (i - Math.floor(chunksX / 2)) * CHUNK_WIDTH
+
+            for (let j = 0; j < chunksY; j++) {
+              const y = (j - Math.floor(chunksY / 2)) * CHUNK_HEIGHT
+
+              if (rendered.includes([x, y])) continue
+              rendered.push([x, y])
+            
+              const paths = queryPolygons(x, y)
+              const renderedPolygons: Layer[] = []
+              for (const polygon of paths) {
+                renderedPolygons.push(drawPolygon(map, canvas, 'gray', polygon))
+              }
+
+              L.layerGroup(renderedPolygons).addTo(map)
             }
-          })
-
-          return () => {
-            map.clearAllEventListeners()
           }
-        }, [coordinates])
-
-        useEffect(() => {
-          console.log('new polygons available')
-          if (!polygons) return
-
-          for (const polygon of polygons) {
-            drawPolygon(map, canvas, 'gray', polygon)
-          }
-        }, [ polygons ])
+        })
 
         return null
       }}
