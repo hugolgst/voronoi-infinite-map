@@ -32,10 +32,9 @@ export type VoronoiProps = {
   width: number
   height: number
   margin?: { top: number; right: number; bottom: number; left: number }
-  svgRef: React.Ref<SVGSVGElement>
 }
 
-const VoronoiTile = ({ width, height, svgRef, margin = defaultMargin }: VoronoiProps) => {
+const VoronoiTile = ({ width, height, margin = defaultMargin }: VoronoiProps) => {
   const innerWidth = width - margin.left - margin.right
   const innerHeight = height - margin.top - margin.bottom
 
@@ -51,11 +50,12 @@ const VoronoiTile = ({ width, height, svgRef, margin = defaultMargin }: VoronoiP
   )
 
   const polygons = voronoiLayout.polygons()
+  const svgRef = useRef<SVGSVGElement>(null)
   const [hoveredId, setHoveredId] = useState<string | null>(null)
   const [neighborIds, setNeighborIds] = useState<Set<string>>(new Set())
 
   return width < 10 ? null : (
-    <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} ref={svgRef}>
+    <svg xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" width={width} height={height} viewBox="0 0 512 512" ref={svgRef}>
       <Group
         top={margin.top}
         left={margin.left}
