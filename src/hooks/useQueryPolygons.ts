@@ -30,13 +30,15 @@ export const useQueryPolygons = (): (x: number, y: number) => Array<VoronoiPolyg
     const [xShift, yShift] = [x - xInt, y - yInt]
 
     const data: Datum[] = new Array(CHUNK_WIDTH * CHUNK_HEIGHT)
-    for (let i: number = xInt; i < xInt + CHUNK_WIDTH; i++)
-      for (let j: number = xInt; j < xInt + CHUNK_WIDTH; j++) {
+    for (let i: number = xInt; i < (xInt + CHUNK_WIDTH); i++)
+      for (let j: number = xInt; j < (xInt + CHUNK_HEIGHT); j++) {
         const id = szudzik(i, j)
         const output = lcg(id, 2)
 
-        const alpha = ((output % 64) * CHUNK_WIDTH) / 64
+        const alpha = ((output % 64) * 1) / 64
         const beta = ((lcg(output, 2) % 64) * 1) / 64
+
+
         data[i + j * CHUNK_WIDTH] = {
           x: xShift + i + alpha - 1 / 2,
           y: yShift + j + beta - 1 / 2,

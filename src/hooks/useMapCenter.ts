@@ -18,19 +18,29 @@ interface MapCenter {
  */
 const useMapCenter = (): MapCenter => {
   const [coordinates, setCoordinates] = useState<Coordinates>([0, 0])
+  const [started, setStarted] = useState<Coordinates>()
 
   return {
     listenToMovements: (map: L.Map) => {
       map.on('movestart', () => {
         const { lat: y, lng: x } = map.getCenter()
 
-        map.on('moveend', () => {
-          const { lat: newY, lng: newX } = map.getCenter()
+        console.log(x, y)
 
-          if (Math.abs(newY - y) > 3/4 * CHUNK_HEIGHT || Math.abs(newX - x) > 3/4 * CHUNK_WIDTH) {
-            setCoordinates([newX, newY])
-          }
-        })
+        setStarted([ x, y ])
+      })
+
+      map.on('moveend', () => {
+        if (!started) return
+
+        const { lat: newY, lng: newX } = map.getCenter()
+
+        console.log(newX, newY)
+
+        if (Math.abs(newY - started[0]) > 3/4 * CHUNK_HEIGHT || Math.abs(newX - started[1]) > 3/4 * CHUNK_WIDTH) {
+          setCoordinates([newX, newY])
+        }
+        setStarted(undefined)
       })
     },
     x: coordinates[0],
