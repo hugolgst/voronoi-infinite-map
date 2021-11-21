@@ -1,13 +1,17 @@
 import { MapConsumer, MapContainer } from 'react-leaflet'
+import React, { useState } from 'react'
 
 import L from 'leaflet'
-import React from 'react'
 import { useDrawPolygon } from '../hooks/useDrawPolygon'
+import useMapCenter from '../hooks/useMapCenter'
 import { useQueryPolygons } from '../hooks/useQueryPolygons'
 
+export type Coordinates = [number, number]
+
 const Map = (): JSX.Element => {
-  const polygons = useQueryPolygons()
+  const queryPolygons = useQueryPolygons()
   const drawPolygon = useDrawPolygon()
+  const { listenToMovements, x, y } = useMapCenter()
 
   return <MapContainer
     style={{
@@ -17,9 +21,9 @@ const Map = (): JSX.Element => {
     }}
 
     center={[0, 0]}
-    zoom={1}
-    minZoom={-5}
-    maxZoom={5}
+    zoom={3}
+    minZoom={0}
+    maxZoom={7}
 
     // Non-geographical map
     crs={L.CRS.Simple}
@@ -34,10 +38,9 @@ const Map = (): JSX.Element => {
     <MapConsumer>
       {(map) => {
         const canvas = L.canvas({}).addTo(map) 
-
-        console.log(polygons)
-
-        polygons.forEach((polygon) => {
+        
+        listenToMovements(map)
+        queryPolygons(x, y).forEach((polygon) => {
           drawPolygon(map, canvas, 'gray', polygon)
         })
 

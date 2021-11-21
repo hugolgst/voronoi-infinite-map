@@ -20,6 +20,7 @@
     "@visx/mock-data": "^2.1.2",
     "@visx/responsive": "^2.4.1",
     "@visx/voronoi": "^2.1.2",
+    "d3-delaunay": "^6.0.2",
     "framer-motion": "^4.0.3",
     "leaflet": "^1.7.1",
     "next": "latest",
