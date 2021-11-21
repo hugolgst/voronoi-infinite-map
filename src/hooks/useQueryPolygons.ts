@@ -30,8 +30,8 @@ export const useQueryPolygons = (): (x: number, y: number) => IterableIterator<D
 
     const data: number[][] = new Array(CHUNK_WIDTH * CHUNK_HEIGHT)
     let index = 0;
-    for (let i: number = xInt; i < (xInt + CHUNK_WIDTH); i++)
-      for (let j: number = xInt; j < (xInt + CHUNK_HEIGHT); j++) {
+    for (let i: number = (xInt - CHUNK_WIDTH); i < (xInt + CHUNK_WIDTH); i++)
+      for (let j: number = (yInt - CHUNK_HEIGHT); j < (yInt + CHUNK_HEIGHT); j++) {
         const id = szudzik(i, j)
         const output = lcg(id, 2)
 
@@ -45,6 +45,6 @@ export const useQueryPolygons = (): (x: number, y: number) => IterableIterator<D
       }
 
     const delaunay = Delaunay.from(data)
-    return delaunay.voronoi([0, 0, CHUNK_HEIGHT, CHUNK_WIDTH]).cellPolygons()
+    return delaunay.voronoi([-CHUNK_HEIGHT/2, -CHUNK_WIDTH/2, CHUNK_HEIGHT/2, CHUNK_WIDTH/2]).cellPolygons()
   }
 }
