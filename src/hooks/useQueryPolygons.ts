@@ -1,6 +1,6 @@
 import { lcg, szudzik } from '../utils/deterministic.js'
 
-import { Delaunay } from "d3-delaunay"
+import { Delaunay } from 'd3-delaunay'
 
 export type Datum = {
   x: number
@@ -8,8 +8,8 @@ export type Datum = {
   id: string
 }
 
-export const CHUNK_WIDTH = 128
-export const CHUNK_HEIGHT = 64
+export const CHUNK_WIDTH = 32
+export const CHUNK_HEIGHT = 32
 
 /**
  * Hook to obtain a function to query new polygons in the given center
@@ -29,7 +29,7 @@ export const useQueryPolygons = (): (x: number, y: number) => IterableIterator<D
     const [xShift, yShift] = [x - xInt, y - yInt]
 
     const data: number[][] = new Array(CHUNK_WIDTH * CHUNK_HEIGHT)
-    let index = 0;
+    let index = 0
     for (let i: number = (xInt - CHUNK_WIDTH); i < (xInt + CHUNK_WIDTH); i++)
       for (let j: number = (yInt - CHUNK_HEIGHT); j < (yInt + CHUNK_HEIGHT); j++) {
         const id = szudzik(i, j)
