@@ -25,7 +25,7 @@ const defaultMargin = {
   top: 0,
   left: 0,
   right: 0,
-  bottom: 76,
+  bottom: 0,
 }
 
 export type VoronoiProps = {
@@ -60,52 +60,23 @@ const VoronoiTile = ({ width, height, margin = defaultMargin }: VoronoiProps) =>
         top={margin.top}
         left={margin.left}
         clipPath="url(#voronoi_clip)"
-        onMouseMove={(event) => {
-          if (!svgRef.current) return
-
-          // find the nearest polygon to the current mouse position
-          const point = localPoint(svgRef.current, event)
-          if (!point) return
-
-          const closest = voronoiLayout.find(point.x, point.y, neighborRadius)
-          // find neighboring polygons to hightlight
-          if (closest && closest.data.id !== hoveredId) {
-            const neighbors = new Set<string>()
-            const cell = voronoiLayout.cells[closest.index]
-            if (!cell) return
-
-            cell.halfedges.forEach((index) => {
-              const edge = voronoiLayout.edges[index]
-              const { left, right } = edge
-              if (left && left !== closest) neighbors.add(left.data.id)
-              else if (right && right !== closest) neighbors.add(right.data.id)
-            })
-
-            setNeighborIds(neighbors)
-            setHoveredId(closest.data.id)
-          }
-        }}
-        onMouseLeave={() => {
-          setHoveredId(null)
-          setNeighborIds(new Set())
-        }}
       >
         <GradientOrangeRed id="voronoi_orange_red" />
         <GradientPinkRed id="voronoi_pink_red" />
-        <RectClipPath id="voronoi_clip" width={innerWidth} height={innerHeight} rx={14} />
+        <RectClipPath id="voronoi_clip" width={innerWidth} height={innerHeight} />
 
         {polygons.map((polygon) => (
           <VoronoiPolygon
             key={`polygon-${polygon.data.id}`}
+            id={`polygon-${polygon.data.id}`}
             polygon={polygon}
-            fill={
-              hoveredId && (polygon.data.id === hoveredId || neighborIds.has(polygon.data.id))
-                ? 'url(#voronoi_orange_red)'
-                : 'url(#voronoi_pink_red)'
-            }
+            fill="#8ab9ff"
             stroke="#fff"
             strokeWidth={1}
             fillOpacity={hoveredId && neighborIds.has(polygon.data.id) ? 0.5 : 1}
+            style={{
+              zIndex: 10000
+            }}
           />
         ))}
         {data.map(({ x, y, id }) => (

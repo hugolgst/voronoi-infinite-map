@@ -20,9 +20,12 @@ const Index = (): JSX.Element => {
     setURL(URL.createObjectURL(blob))
   }, [svgRef])
 
-  console.log(url)
-
-  return <>
+  return <Box
+    w="100vw"
+    h="100vh"
+    boxSizing="border-box"
+    border="solid 2px"
+  >
     { url ? null : <Box ref={svgRef}>
       <VoronoiTile
         width={512}
@@ -30,8 +33,8 @@ const Index = (): JSX.Element => {
       />
     </Box> }
 
-    { url ? <Map url={url} /> : null }
-  </>
+    <Map url={url} />
+  </Box>
 }
 
 export default Index
