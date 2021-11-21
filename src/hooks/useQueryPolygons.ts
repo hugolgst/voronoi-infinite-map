@@ -1,5 +1,6 @@
 import { lcg, szudzik } from '../utils/deterministic.js'
 
+import { Delaunay } from "d3-delaunay"
 import { VoronoiPolygon } from 'd3-voronoi'
 import { voronoi } from '@visx/voronoi'
 
@@ -25,7 +26,7 @@ export const useQueryPolygons = (): (x: number, y: number) => Array<VoronoiPolyg
     const [xInt, yInt] = [Math.trunc(x), Math.trunc(y)]
     const [xShift, yShift] = [x - xInt, y - yInt]
 
-    const data: Datum[] = new Array(CHUNK_WIDTH * CHUNK_HEIGHT)
+    const data: number[][] = new Array(CHUNK_WIDTH * CHUNK_HEIGHT)
     for (let i: number = xInt; i < (xInt + CHUNK_WIDTH); i++)
       for (let j: number = xInt; j < (xInt + CHUNK_HEIGHT); j++) {
         const id = szudzik(i, j)
@@ -34,21 +35,13 @@ export const useQueryPolygons = (): (x: number, y: number) => Array<VoronoiPolyg
         const alpha = ((output % 64) * 1) / 64
         const beta = ((lcg(output, 2) % 64) * 1) / 64
 
-
-        data[i + j * CHUNK_WIDTH] = {
-          x: xShift + i + alpha - 1 / 2,
-          y: yShift + j + beta - 1 / 2,
-          id: id.toString(),
-        }
+        data[i + j * CHUNK_WIDTH] = [
+          yShift + j + beta - 1 / 2,
+          xShift + i + alpha - 1 / 2
+        ]
       }
 
-    const voronoiLayout = voronoi<Datum>({
-      x: (d) => d.y,
-      y: (d) => d.x,
-      width: CHUNK_HEIGHT,
-      height: CHUNK_WIDTH,
-    })(data)
-
-    return voronoiLayout.polygons()
+    const delaunay = Delaunay.from(data)
+    return delaunay.voronoi([0, 0, CHUNK_HEIGHT, CHUNK_WIDTH]).cellPolygons()
   }
 }

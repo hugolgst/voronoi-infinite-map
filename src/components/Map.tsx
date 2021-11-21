@@ -12,13 +12,13 @@ export type Coordinates = [number, number]
 const Map = (): JSX.Element => {
   const queryPolygons = useQueryPolygons()
   const drawPolygon = useDrawPolygon()
-  const { listenToMovements, x, y } = useMapCenter()
+  const { listenToMovements, coordinates } = useMapCenter()
   const [ polygons, setPolygons ] = useState<Array<VoronoiPolygon<Datum>>>()
 
   useEffect(() => {
-    if (!x || !y) return
-    setPolygons(queryPolygons(x, y))
-  }, [ x, y ])
+    if (!coordinates) return
+    setPolygons(queryPolygons(...coordinates))
+  }, [ coordinates ])
 
   return <MapContainer
     style={{
@@ -48,9 +48,10 @@ const Map = (): JSX.Element => {
         listenToMovements(map)        
 
         if (!polygons) return null
-        polygons.forEach((polygon) => {
+
+        for (const polygon of polygons) {
           drawPolygon(map, canvas, 'gray', polygon)
-        })
+        }
 
         return null
       }}

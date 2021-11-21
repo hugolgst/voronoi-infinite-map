@@ -6,8 +6,7 @@ import { useState } from 'react'
 
 interface MapCenter {
   listenToMovements: (map: L.Map) => void
-  x: number
-  y: number
+  coordinates: Coordinates
 }
 
 /**
@@ -38,8 +37,7 @@ const useMapCenter = (): MapCenter => {
         }
       })
     },
-    x: coordinates[0],
-    y: coordinates[1]
+    coordinates
   }
 }
 
