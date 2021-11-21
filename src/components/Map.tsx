@@ -1,10 +1,11 @@
+import { Datum, useQueryPolygons } from '../hooks/useQueryPolygons'
 import { MapConsumer, MapContainer } from 'react-leaflet'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import L from 'leaflet'
+import { VoronoiPolygon } from 'd3-voronoi'
 import { useDrawPolygon } from '../hooks/useDrawPolygon'
 import useMapCenter from '../hooks/useMapCenter'
-import { useQueryPolygons } from '../hooks/useQueryPolygons'
 
 export type Coordinates = [number, number]
 
@@ -12,6 +13,12 @@ const Map = (): JSX.Element => {
   const queryPolygons = useQueryPolygons()
   const drawPolygon = useDrawPolygon()
   const { listenToMovements, x, y } = useMapCenter()
+  const [ polygons, setPolygons ] = useState<Array<VoronoiPolygon<Datum>>>()
+
+  useEffect(() => {
+    if (!x || !y) return
+    setPolygons(queryPolygons(x, y))
+  }, [ x, y ])
 
   return <MapContainer
     style={{
@@ -38,9 +45,10 @@ const Map = (): JSX.Element => {
     <MapConsumer>
       {(map) => {
         const canvas = L.canvas({}).addTo(map) 
-        
-        listenToMovements(map)
-        queryPolygons(x, y).forEach((polygon) => {
+        listenToMovements(map)        
+
+        if (!polygons) return null
+        polygons.forEach((polygon) => {
           drawPolygon(map, canvas, 'gray', polygon)
         })
 

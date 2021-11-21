@@ -1,17 +1,13 @@
 import { lcg, szudzik } from '../utils/deterministic.js'
-import { useEffect, useMemo, useState } from 'react'
 
 import { VoronoiPolygon } from 'd3-voronoi'
-import { getSeededRandom } from '@visx/mock-data'
 import { voronoi } from '@visx/voronoi'
 
-type Datum = {
+export type Datum = {
   x: number
   y: number
   id: string
 }
-
-const seededRandom = getSeededRandom(0.88)
 
 export const CHUNK_WIDTH = 128
 export const CHUNK_HEIGHT = 64
