@@ -16,7 +16,7 @@ interface MapCenter {
  * @returns 
  */
 const useMapCenter = (): MapCenter => {
-  const [ coordinates, setCoordinates ] = useState<Coordinates>([0, 0])
+  const [ coordinates, setCoordinates ] = useState<Coordinates>([1, 0])
 
   return {
     listenToMovements: (map: L.Map) => {

@@ -19,12 +19,17 @@ export const CHUNK_HEIGHT = 64
  * 
  * @returns The query function
  */
-export const useQueryPolygons = (): (x: number, y: number) => Array<number[]> => {
-  return (x: number, y: number): Array<number[]> => {
+export const useQueryPolygons = (): (x: number, y: number) => IterableIterator<Delaunay.Polygon & {
+  index: number;
+}> => {
+  return (x: number, y: number): IterableIterator<Delaunay.Polygon & {
+    index: number;
+  }> => {
     const [xInt, yInt] = [Math.trunc(x), Math.trunc(y)]
     const [xShift, yShift] = [x - xInt, y - yInt]
 
     const data: number[][] = new Array(CHUNK_WIDTH * CHUNK_HEIGHT)
+    let index = 0;
     for (let i: number = xInt; i < (xInt + CHUNK_WIDTH); i++)
       for (let j: number = xInt; j < (xInt + CHUNK_HEIGHT); j++) {
         const id = szudzik(i, j)
@@ -33,7 +38,7 @@ export const useQueryPolygons = (): (x: number, y: number) => Array<number[]> =>
         const alpha = ((output % 64) * 1) / 64
         const beta = ((lcg(output, 2) % 64) * 1) / 64
 
-        data[i + j * CHUNK_WIDTH] = [
+        data[index++] = [
           yShift + j + beta - 1 / 2,
           xShift + i + alpha - 1 / 2
         ]

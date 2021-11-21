@@ -31,7 +31,7 @@ const strokeWidth = (map: L.Map, polygon: L.Polygon) => {
     polygon.setStyle({
       // Base weight: 1. A positive zoom n should make it n times bigger: n.
       // A negative zoom should make it n times smaller: 1/n 
-      'weight': (zoom >= 0) ? Math.abs(zoom) + 1 : 1 / (Math.abs(zoom) + 1)
+      'weight': Math.abs(zoom) / 3
     })
   })
 }
