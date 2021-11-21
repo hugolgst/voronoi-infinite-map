@@ -1,8 +1,6 @@
 import { lcg, szudzik } from '../utils/deterministic.js'
 
 import { Delaunay } from "d3-delaunay"
-import { VoronoiPolygon } from 'd3-voronoi'
-import { voronoi } from '@visx/voronoi'
 
 export type Datum = {
   x: number
@@ -21,8 +19,8 @@ export const CHUNK_HEIGHT = 64
  * 
  * @returns The query function
  */
-export const useQueryPolygons = (): (x: number, y: number) => Array<VoronoiPolygon<Datum>> => {
-  return (x: number, y: number): Array<VoronoiPolygon<Datum>> => {
+export const useQueryPolygons = (): (x: number, y: number) => Array<number[]> => {
+  return (x: number, y: number): Array<number[]> => {
     const [xInt, yInt] = [Math.trunc(x), Math.trunc(y)]
     const [xShift, yShift] = [x - xInt, y - yInt]
 
