@@ -16,11 +16,11 @@ interface MapCenter {
  * @returns 
  */
 const useMapCenter = (): MapCenter => {
-  const [ coordinates, setCoordinates ] = useState<Coordinates>([1, 0])
+  const [ coordinates, setCoordinates ] = useState<Coordinates>([0, 0])
 
   return {
     listenToMovements: (map: L.Map) => {
-      let previous: Coordinates
+      let previous: Coordinates | undefined
 
       map.on('movestart', () => {
         const center = map.getCenter()
@@ -34,6 +34,8 @@ const useMapCenter = (): MapCenter => {
     
         if (Math.abs(newY - previous[0]) > 3/4 * CHUNK_HEIGHT || Math.abs(newX - previous[1]) > 3/4 * CHUNK_WIDTH) {
           setCoordinates([newX, newY])
+          previous = undefined
+          console.log('new coordinates', [newX, newY])
         }
       })
     },

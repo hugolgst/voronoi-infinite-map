@@ -45,6 +45,6 @@ export const useQueryPolygons = (): (x: number, y: number) => IterableIterator<D
       }
 
     const delaunay = Delaunay.from(data)
-    return delaunay.voronoi([-CHUNK_HEIGHT/2, -CHUNK_WIDTH/2, CHUNK_HEIGHT/2, CHUNK_WIDTH/2]).cellPolygons()
+    return delaunay.voronoi([y-CHUNK_HEIGHT/2, x-CHUNK_WIDTH/2, y + CHUNK_HEIGHT/2, x + CHUNK_WIDTH/2]).cellPolygons()
   }
 }
