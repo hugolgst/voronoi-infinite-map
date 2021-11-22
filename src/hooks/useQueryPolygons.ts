@@ -8,8 +8,8 @@ export type Datum = {
   id: string
 }
 
-export const CHUNK_WIDTH = 16
-export const CHUNK_HEIGHT = 16
+export const CHUNK_WIDTH = 32
+export const CHUNK_HEIGHT = 32
 
 /**
  * Hook to obtain a function to query new polygons in the given center

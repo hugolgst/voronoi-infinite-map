@@ -1,4 +1,4 @@
-import L, { Layer } from 'leaflet'
+import L from 'leaflet'
 
 type Path = Array<[number, number]>
 
@@ -41,8 +41,8 @@ const strokeWidth = (map: L.Map, polygon: L.Polygon) => {
  * 
  * @returns The draw function
  */
-export const useDrawPolygon = (): ((map: L.Map, canvas: L.Canvas, color: string, path: Path) => Layer) => {
-  return (map: L.Map, canvas: L.Canvas, color: string, path: Path): Layer => {
+export const useDrawPolygon = (): ((map: L.Map, canvas: L.Canvas, color: string, path: Path) => L.Layer) => {
+  return (map: L.Map, canvas: L.Canvas, color: string, path: Path): L.Layer => {
     const polygon = L.polygon(path, {
       color,
       'fillColor': 'gray',
@@ -50,7 +50,7 @@ export const useDrawPolygon = (): ((map: L.Map, canvas: L.Canvas, color: string,
     })
 
     hoverSelection(polygon, color, 'red')
-    strokeWidth(map, polygon)
+    // strokeWidth(map, polygon)
 
     return polygon
   }

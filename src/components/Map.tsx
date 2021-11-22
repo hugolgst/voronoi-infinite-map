@@ -1,27 +1,94 @@
 import { CHUNK_HEIGHT, CHUNK_WIDTH, useQueryPolygons } from '../hooks/useQueryPolygons'
-import L, { Layer } from 'leaflet'
-import { MapConsumer, MapContainer } from 'react-leaflet'
-import React, { useEffect } from 'react'
+import { MapContainer, useMap } from 'react-leaflet'
 
+import L from 'leaflet'
+import React from 'react'
+import { createTileLayerComponent } from '@react-leaflet/core'
+import { useChunkGarbageCollector } from '../hooks/useChunkGarbageCollector'
 import { useDrawPolygon } from '../hooks/useDrawPolygon'
 
 export type Coordinates = [number, number]
+
+const dummyDiv = (): HTMLDivElement => {
+  const tile = document.createElement('div')
+  tile.style.backgroundColor = '#3e3e4a'
+  tile.style.width = '100%'
+  tile.style.height = '100%'
+
+  return tile
+}
 
 const Map = (): JSX.Element => {
   const queryPolygons = useQueryPolygons()
   const drawPolygon = useDrawPolygon()
 
+  const Tile = (): JSX.Element => {
+    const map = useMap()
+    const canvas = L.canvas({}).addTo(map) 
+    const { addChunk, collectGarbage, isRendered } = useChunkGarbageCollector()
+
+    // Extended core leaflet element to retrieve the image from the bucket directly
+    const ExtendedTileLayer = L.TileLayer.extend({
+      createTile: (coords: {
+        x: number,
+        y: number
+      }) => {
+        const x = coords.x * CHUNK_WIDTH - CHUNK_WIDTH/2
+        const y = coords.y * CHUNK_HEIGHT - CHUNK_HEIGHT/2
+
+        if (isRendered(x, y)) return dummyDiv()
+
+        // Compute the paths and draw the polygons in a LayerGroup
+        const paths = queryPolygons(x, y)
+        const polygons: Array<L.Layer> = []
+        for (const path of paths) {
+          const polygon = drawPolygon(map, canvas, 'gray', path)
+          polygons.push(polygon)
+        }
+        const layerGroup = L.layerGroup(polygons).addTo(map)
+
+        addChunk({
+          center: { x: x, y: y },
+          clear: () => { layerGroup.clearLayers() }
+        })
+        const center = map.getCenter()
+        collectGarbage(center.lng, center.lat)
+
+        return dummyDiv()
+      }
+    })
+
+    // Build the react-leaflet matching element to the previous one
+    const CustomTileLayer = createTileLayerComponent((props, context) => {
+      return {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        instance: new ExtendedTileLayer(props.url, {
+          maxNativeZoom: 0,
+          tileSize: CHUNK_HEIGHT,
+          edgeBufferTiles: 10,
+          ...props 
+        }),
+        context
+      }
+    }, () => null)
+
+    return <CustomTileLayer />
+  }
+
   return <MapContainer
     style={{
       width: '100%',
       height: '100%',
-      backgroundColor: '#1b202b'
+      backgroundColor: '#e8e8e8'
     }}
 
     center={[0, 0]}
     zoom={5}
-    minZoom={4}
-    maxZoom={7}
+    minZoom={3}
+    maxZoom={10}
+
+    preferCanvas={true}
 
     // Non-geographical map
     crs={L.CRS.Simple}
@@ -33,44 +100,7 @@ const Map = (): JSX.Element => {
     attributionControl={false}
   // zoomControl={false}
   >
-    <MapConsumer>
-      {(map) => {
-        const canvas = L.canvas({}).addTo(map) 
-        const clearCanvas = () => {
-          map.eachLayer((layer) => {
-            layer.remove()
-          })
-        }
-        const rendered: Array<[number, number]> = []
-
-        map.on('moveend', () => {
-          const chunksX = Math.ceil(Math.abs((map.getBounds().getWest() - map.getBounds().getEast()) / CHUNK_WIDTH)) + 1
-          const chunksY = Math.ceil(Math.abs((map.getBounds().getSouth() - map.getBounds().getNorth()) / CHUNK_HEIGHT)) + 1
-
-
-          for (let i = 0; i < chunksX; i++) {
-            const x = (i - Math.floor(chunksX / 2)) * CHUNK_WIDTH
-
-            for (let j = 0; j < chunksY; j++) {
-              const y = (j - Math.floor(chunksY / 2)) * CHUNK_HEIGHT
-
-              if (rendered.includes([x, y])) continue
-              rendered.push([x, y])
-            
-              const paths = queryPolygons(x, y)
-              const renderedPolygons: Layer[] = []
-              for (const polygon of paths) {
-                renderedPolygons.push(drawPolygon(map, canvas, 'gray', polygon))
-              }
-
-              L.layerGroup(renderedPolygons).addTo(map)
-            }
-          }
-        })
-
-        return null
-      }}
-    </MapConsumer>
+    <Tile />
   </MapContainer>
 }
 
