@@ -24,7 +24,7 @@ const Map = (): JSX.Element => {
 
   const Tile = (): JSX.Element => {
     const map = useMap()
-    const canvas = L.canvas({}).addTo(map) 
+    const canvas = L.canvas({}).addTo(map)
     const { addChunk, collectGarbage, isRendered } = useChunkGarbageCollector()
 
     // Extended core leaflet element to retrieve the image from the bucket directly
@@ -33,17 +33,28 @@ const Map = (): JSX.Element => {
         x: number,
         y: number
       }) => {
-        const x = coords.x * CHUNK_WIDTH - CHUNK_WIDTH/2
-        const y = coords.y * CHUNK_HEIGHT - CHUNK_HEIGHT/2
+        const x = coords.x * CHUNK_WIDTH - CHUNK_WIDTH / 2
+        const y = coords.y * CHUNK_HEIGHT - CHUNK_HEIGHT / 2
+
+        L.marker([x, y]).bindTooltip("chunk: (" + coords.x + "; " + coords.y + ")", { permanent: true, offset: [0, 12] }).addTo(map)
 
         if (isRendered(x, y)) return dummyDiv()
 
         // Compute the paths and draw the polygons in a LayerGroup
         const paths = queryPolygons(x, y)
         const polygons: Array<L.Layer> = []
+        let i = 0;
+
+
         for (const path of paths) {
-          const polygon = drawPolygon(map, canvas, 'gray', path)
-          polygons.push(polygon)
+          let ix = i % 35;
+          let iy = (i - ix) / 35;
+          console.log(i)
+          if (iy != 0 && iy != 34 && iy != 33) {
+            const polygon = drawPolygon(map, canvas, 'gray', path)
+            polygons.push(polygon)
+          }
+          i++;
         }
         const layerGroup = L.layerGroup(polygons).addTo(map)
 
@@ -54,6 +65,7 @@ const Map = (): JSX.Element => {
         const center = map.getCenter()
         collectGarbage(center.lng, center.lat)
 
+        console.log("c")
         return dummyDiv()
       }
     })
@@ -67,7 +79,7 @@ const Map = (): JSX.Element => {
           maxNativeZoom: 0,
           tileSize: CHUNK_HEIGHT,
           edgeBufferTiles: 10,
-          ...props 
+          ...props
         }),
         context
       }
