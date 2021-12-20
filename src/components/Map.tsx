@@ -45,12 +45,10 @@ const Map = (): JSX.Element => {
         const polygons: Array<L.Layer> = []
         let i = 0;
 
-
         for (const path of paths) {
           let ix = i % 35;
           let iy = (i - ix) / 35;
-          console.log(i)
-          if (iy != 0 && iy != 34 && iy != 33) {
+          if (iy != 0 && iy != 33 && iy != 34) {
             const polygon = drawPolygon(map, canvas, 'gray', path)
             polygons.push(polygon)
           }
@@ -65,7 +63,6 @@ const Map = (): JSX.Element => {
         const center = map.getCenter()
         collectGarbage(center.lng, center.lat)
 
-        console.log("c")
         return dummyDiv()
       }
     })
